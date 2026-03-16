@@ -9,3 +9,8 @@ The steps required:
 3. The 2 Big Query codes provided, create and save the views in Big Query
 4. Make a copy of the looker studio dashboard and connect it to the saved views
 
+WatchOuts: 
+
+1. The Error Rate metric coems from the error-rate-view which is used in the scorecard and couple of the charts
+2. The calculation is - SUM(error_sessions)/SUM(total_sessions)
+3. Rest of the dashboard is coming from master-view
