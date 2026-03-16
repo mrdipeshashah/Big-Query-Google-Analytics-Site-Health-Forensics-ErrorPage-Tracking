@@ -1,0 +1,20 @@
+SELECT
+  PARSE_DATE('%Y%m%d', event_date) AS full_date,
+  EXTRACT(MONTH FROM PARSE_DATE('%Y%m%d', event_date)) AS month_no,
+  FORMAT_DATE('%B', PARSE_DATE('%Y%m%d', event_date)) AS month_name,
+  EXTRACT(YEAR FROM PARSE_DATE('%Y%m%d', event_date)) AS year,
+  FORMAT_DATE('%A', PARSE_DATE('%Y%m%d', event_date)) AS day_of_week,
+  MOD(EXTRACT(DAYOFWEEK FROM PARSE_DATE('%Y%m%d', event_date)) + 5, 7) + 1 AS day_of_week_no,
+  EXTRACT(WEEK FROM PARSE_DATE('%Y%m%d', event_date)) AS week_number,
+  device.category AS device_category,
+  device.web_info.browser AS browser,
+  device.operating_system AS os,
+  geo.continent AS continent,
+  geo.country AS country,
+  CONCAT(IFNULL(collected_traffic_source.manual_source, '(direct)'), ' / ', IFNULL(collected_traffic_source.manual_medium, '(none)')) AS source_medium,
+  COUNT(DISTINCT CONCAT(user_pseudo_id, (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id'))) AS total_sessions,
+  COUNT(DISTINCT CASE WHEN event_name = 'page_not_found' OR (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'tag_category') = 'Error Page' 
+        THEN CONCAT(user_pseudo_id, (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id')) ELSE NULL END) AS error_sessions
+FROM `enter.tablename_123456.events_*`
+WHERE _TABLE_SUFFIX BETWEEN '20250101' AND '20261231'
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
