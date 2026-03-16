@@ -1,0 +1,37 @@
+WITH raw_data AS (
+  SELECT
+    user_pseudo_id,
+    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS session_id,
+    event_name,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'tag_category') AS tag_category,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'tag_name') AS tag_name,
+    device.category AS device_category,
+    device.web_info.browser AS browser,
+    device.operating_system AS os,
+    geo.continent AS continent,
+    geo.country AS country,
+    collected_traffic_source.manual_source AS source,
+    collected_traffic_source.manual_medium AS medium,
+    collected_traffic_source.manual_campaign_name AS campaign,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_referrer') AS page_referrer,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location') AS full_page_location,
+    PARSE_DATE('%Y%m%d', event_date) AS full_date,
+    TIMESTAMP_MICROS(event_timestamp) AS event_time
+  FROM `enter.tablename_123456.events_*`
+  WHERE _TABLE_SUFFIX BETWEEN '20250101' AND '20261231' 
+)
+SELECT
+  *,
+  CONCAT(IFNULL(source, '(direct)'), ' / ', IFNULL(medium, '(none)')) AS source_medium,
+  SPLIT(full_page_location, '?')[SAFE_OFFSET(0)] AS page_location,
+  EXTRACT(MONTH FROM full_date) AS month_no,
+  FORMAT_DATE('%B', full_date) AS month_name,
+  EXTRACT(YEAR FROM full_date) AS year,
+  FORMAT_DATE('%A', full_date) AS day_of_week,
+  -- Monday=1, Sunday=7 for chronological sorting
+  MOD(EXTRACT(DAYOFWEEK FROM full_date) + 5, 7) + 1 AS day_of_week_no,
+  EXTRACT(WEEK FROM full_date) AS week_number,
+  EXTRACT(HOUR FROM event_time) AS hour,
+  1 AS count
+FROM raw_data
+WHERE tag_category = 'Error Page' OR event_name = 'page_not_found'
