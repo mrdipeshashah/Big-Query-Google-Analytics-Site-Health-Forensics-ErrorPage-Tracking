@@ -11,6 +11,6 @@ The steps required:
 
 Watch-Outs: 
 
-1. The Error Rate metric coems from the error-rate-view which is used in the scorecard and couple of the charts
+1. The Error Rate metric comes from the error-rate-view which is used in the scorecard and couple of the charts
 2. The calculation for Error Metrics is - SUM(error_sessions)/SUM(total_sessions)
 3. Rest of the dashboard is coming from master-view
